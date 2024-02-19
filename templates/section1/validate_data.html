@@ -1,0 +1,76 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <h4 style="color: red;">Validate Data for Selected Month</h4>
+    <div class="row">
+        <div class="col-md-2">
+            <form method="POST" action="{% url 'validate_data' %}" class="post-form">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary">Start Validation</button>
+            </form>
+        </div>
+    </div>
+    <form id="revalidateForm" method="POST" action="{% url 'validate_data' %}?month={{ month }}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="report_month" id="revalidateMonthInput">
+        <!-- Ensure you have a submit button inside the form, even if hidden -->
+        <button type="submit" style="display: none;">Submit</button>
+    </form>
+    <div class="containter mt-3">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if month_stats %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Report Month</th>
+                        <th scope="col">Validation Run</th>
+                        <th scope="col">Validation Run on</th>
+                        <th scope="col">Error Count</th>
+                        <th scope="col">No Error Count</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for stat in month_stats %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td> {{stat.month}} </td>
+                        <td> {{stat.version}} </td>
+                        <td> {{stat.max_updated_at}} </td>
+                        <td> {{stat.errors_count}} </td>
+                        <td> {{stat.no_errors_count}} </td>
+                        <td> <a href="javascript:void(0);" class="revalidate-link" data-month="{{ stat.month }}">Revalidate</a> |
+                        <a href="{% url 'error_list' month=stat.month version=stat.version %}">View Errors</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+        No Validation Results available at this time
+        {% endif %}
+        </div>
+</div>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.revalidate-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent default link behavior
+                var month = this.getAttribute('data-month');
+                document.getElementById('revalidateMonthInput').value = month;
+                document.getElementById('revalidateForm').submit();
+            });
+        });
+    });
+    </script>
+{% endblock %}

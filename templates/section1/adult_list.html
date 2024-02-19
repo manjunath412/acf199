@@ -1,0 +1,32 @@
+{% extends "_base.html" %}
+
+{% block title %}Families{% endblock title %}
+
+{% block content %}
+<a href="{% url 'adult_create' family.pk %}" class="btn btn-primary">Add New Adult</a>
+
+<h4 style="color: red;">Adults in Family: {{ family.case_number }} for the month of {{ report_month }}</h4>
+<div class="containter mt-3">
+    {% if adults %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">SSN</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for adult in adults %}
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td> {{adult.ssn}}</td>
+                    <td> <a href="{% url 'adult_update' family.id adult.pk %}">Edit Adult</a>|
+                        <a href="{% url 'adult_delete' family.id adult.pk %}">Delete Adult</a>|
+                        <a href="{% url 'family_list' month_id %}">Family List</a>|
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock content %}

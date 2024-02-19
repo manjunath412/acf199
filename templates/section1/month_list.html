@@ -1,0 +1,38 @@
+{% extends "_base.html" %}
+
+{% block title %}Quarters{% endblock title %}
+
+{% block content %}
+<a href="{% url 'month_create' quarter.pk %}?report_quarter={{ quarter.report_quarter }}" class="btn btn-primary">Add New Report Month</a>
+
+<h4 style="color: red;">Months for Quarter: {{ quarter.report_quarter }}</h4>
+<div class="containter mt-3">
+    {% if months %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Report Month</th>
+                    <th scope="col">Start Date</th>
+                    <th scope="col">End Date</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in months %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td> {{month.report_month}}</td>
+                    <td> {{month.start_date}}</td>
+                    <td> {{month.end_date}}</td>
+                    <td> <a href="{% url 'month-update' month.pk %}">Edit Month</a>|
+                        <a href="{% url 'month-delete' month.pk %}">Delete Month</a>|
+                        <a href="{% url 'family_list' month.pk %}">Family List</a>|
+                        <a href="{% url 'file_upload' month.pk %}">Import Case Files</a>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,59 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="containter mt-3">
+    <h4 style="color: red;">Validation run #{{ version }} results for {{ month }}. Last Updated at {{ last_validated_on }}</h4>
+    {% if page_obj %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col"><a href="?sort=edit_type">Edit Type</a></th>
+                    <th scope="col"><a href="?sort=edit_number">Edit #</a></th>
+                    <th scope="col"><a href="?sort=item_number">Item #</a></th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Edit Values</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for error in page_obj %}
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td> {{error.edit_type}} </td>
+                    <td> {{error.edit_number}} </td>
+                    <td> {{error.item_number}} </td>
+                    <td> {{error.description}} </td>
+                    <td> {{error.edit_values}} </td>
+                    {% if error.adult %}
+                        <td> <a href="{% url 'adult_update' error.family.id error.adult.id %}">Review Adult</a></td>
+                    {% else %}
+                        <td> <a href="{% url 'family_update' error.family.id %}">Review Family</a></td>
+                {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?sort={{ request.GET.sort }}&page=1">&laquo; First</a>
+                    <a href="?sort={{ request.GET.sort }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?sort={{ request.GET.sort }}&page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?sort={{ request.GET.sort }}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% else %}
+    No Validation Results available at this time
+    {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="container mt-3">
+        <h4 style="color: red;">Upload Files for {{ month }} </h4>
+        {% if messages %}
+            {% for message in messages %}
+                <h6 style="color: green;">{{ message }}</h6>
+            {% endfor %}
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+    </div>
+    <form id="revalidateForm" method="POST" action="{% url 'validate_data' %}?month={{ month }}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="report_month" id="revalidateMonthInput">
+        <button type="submit" style="display: none;">Submit</button>
+    </form>
+    <div class="container mt-3">
+        <h4 style="color: red;">Prior Uploaded File History for {{ month }} </h4>
+        {% if prior_uploads %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Model Type</th>
+                        <th scope="col">Uploaded By</th>
+                        <th scope="col">Uploaded At</th>
+                        <th scope="col">Uploaded File</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for upload in prior_uploads %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td> {{upload.model_type}} </td>
+                            <td> {{upload.uploaded_by}} </td>
+                            <td> {{upload.uploaded_at}} </td>
+                            <td> <a href="{{ upload.file.url }}" target="_blank">{{ upload.file.name }}</a></td>
+                            <td> <a href="javascript:void(0);" class="revalidate-link" data-month="{{ month }}">(Re)validate</a>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.revalidate-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent default link behavior
+                var month = this.getAttribute('data-month');
+                document.getElementById('revalidateMonthInput').value = month;
+                document.getElementById('revalidateForm').submit();
+            });
+        });
+    });
+    </script>
+{% endblock %}

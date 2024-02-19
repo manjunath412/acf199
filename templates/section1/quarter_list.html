@@ -1,0 +1,36 @@
+{% extends "_base.html" %}
+
+{% block title %}Quarters{% endblock title %}
+
+{% block content %}
+<a href="{% url 'quarter-create' %}" class="btn btn-primary">Add New Report Quarter</a>
+<div class="containter mt-3">
+    {% if quarters %}
+        <h4 style="color: red;">Quarters</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Quarter</th>
+                    <th scope="col">Start Date</th>
+                    <th scope="col">End Date</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quarter in quarters %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td> {{quarter.report_quarter}}</td>
+                    <td> {{quarter.start_date}}</td>
+                    <td> {{quarter.end_date}}</td>
+                    <td> <a href="{% url 'quarter-update' quarter.pk %}">Edit Quarter</a>|
+                         <a href="{% url 'quarter-delete' quarter.pk %}">Delete Quarter</a>|
+                         <a href="{% url 'month-list' quarter.pk %}">Quarter Months</a>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock content %}

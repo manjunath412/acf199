@@ -1,0 +1,6 @@
+case_number,county_fips_code,stratum,zip_code,funding_stream,disposition,new_applicant,num_family_members,family_type,receives_subsidized_housing,receives_medical_assistance,snap_amount,subsid_child_care_amount,child_support_amount,family_cash_resources,item21a_amount,item21b_nbr_month,item22a_amount,item22b_children_covered,item22c_nbr_months,item23a_amount,item23b_nbr_months,item26a1_sanc_redux_amt,item26a2_work_req_sanction,item26a4_teen_prnt_schl_attend_sanc,item26a5_child_support_non_coop,item26a6_irp_non_coop,item26a7_other_sanction,item26b_recoupment,item26c1_other_tot_red_amount,item26c2_family_cap,item26c3_red_len_assist,item26c4_other_non_sanction,fam_exempt_fed_time_limits
+12123132123,012,01,00001,2,1,1,02,1,1,1,0012,0002,0002,0002,0002,002,0002,02,002,0002,002,0002,1,1,1,1,1,0004,0006,1,1,1,01
+12312313225,2,2,2,1,1,1,2,1,1,1,3,1,2,5,5,5,5,5,5,5,5,5,1,2,2,1,2,11,1,1,1,1,02,nagarajbr,2024-02-15 22:08:04.689368+00:00
+00000000017,002,02,00002,2,1,1,01,1,1,1,0003,0012,0006,0006,0005,005,0005,05,005,0005,005,0005,2,1,2,1,1,0001,0005,1,1,1,01
+00000000522,005,05,00005,1,1,1,02,1,1,1,0005,0012,0005,0005,0005,005,0005,05,005,0005,005,0006,1,1,1,1,1,0011,0005,1,2,2,01
+00000000022,010,10,00001,1,1,1,08,1,1,1,0002,0003,0321,0001,0005,005,0005,05,005,0005,005,0005,1,1,1,1,1,0005,0006,1,1,1,02

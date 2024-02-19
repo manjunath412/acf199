@@ -1,0 +1,46 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="container mt-3">
+        <h4 style="color: red;">Select Quarter to Create Section1 File</h4>
+        {% if messages %}
+            {% for message in messages %}
+                <h6 style="color: green;">{{ message }}</h6>
+            {% endfor %}
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">Create Section1 File</button>
+        </form>
+    </div>
+    <div class="container mt-3">
+        {% if files %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Quarter</th>
+                        <th scope="col">File</th>
+                        <th scope="col">Created By</th>
+                        <th scope="col">Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td> {{file.quarter}} </td>
+                            <td> <a href="{{ file.file.url }}">{{ file.name }}</a> </td>
+                            <td> {{file.created_by}} </td>
+                            <td> {{file.created_at}} </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

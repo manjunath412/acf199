@@ -1,0 +1,18 @@
+{% extends '_base.html' %}
+
+{% block content %}
+  <h2>Select Quarter to View Files</h2>
+  <form method="get">
+    {{ form.as_p }}
+    <button type="submit">Show Files</button>
+  </form>
+
+  {% if files %}
+    <h3>Files</h3>
+    <ul>
+      {% for file in files %}
+        <li><a href="{{ file.file.url }}">{{ file.name }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

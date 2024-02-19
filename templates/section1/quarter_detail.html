@@ -1,0 +1,12 @@
+
+{% extends "_base.html" %}
+
+{% block title %}{{ object.title }}{% endblock title %}
+
+{% block content %}
+    <div class="quarter-detail">
+        <h2><a href="">{{ quarter.report_quarter }}</a></h2>
+        <p>Start Date: {{ quarter.start_date }}</p>
+        <p>End Date: {{ quarter.end_date }}</p>
+    </div>
+{% endblock content %}

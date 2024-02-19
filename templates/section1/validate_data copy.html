@@ -1,0 +1,64 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <h2>Validate Data for Selected Month</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary">Start Validation</button>
+            </form>
+        </div>
+    </div>
+    <div class="containter mt-3">
+        {% if validation_results %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Report Month</th>
+                        <th scope="col">Case Number</th>
+                        <th scope="col">Case Number/SSN</th>
+                        <th scope="col">Edit Type</th>
+                        <th scope="col">Edit Number</th>
+                        <th scope="col">Item Number</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Edit Value</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in validation_results %}
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td> {{result.report_month}}</td>
+                        <td> {{result.family.case_number}}</td>
+                        {% if result.adult.ssn %}
+                            <td> {{result.adult.ssn}}</td>
+                        {% else %}
+                            <td> {{result.family.case_number}}</td>
+                        {% endif %}
+                        <td> {{result.edit_type}}</td>
+                        <td> {{result.edit_number}}</td>
+                        <td> {{result.item_number}}</td>
+                        <td> {{result.description}}</td>
+                        <td> {{result.edit_values}}</td>
+                        <td> {{result.error_flag}}</td>
+                        <td> {{result.case_pk}}</td>
+                        {% if result.adult.ssn %}
+                            <td> <a href="{% url 'adult_update' result.family.id result.adult.pk %}">Review Adult</a></td>
+                        {% else %}
+                            <td> <a href="{% url 'family_update' result.family.id %}">Review Family</a></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+        No Validation Results available at this time
+        {% endif %}
+        </div>
+</div>
+{% endblock %}

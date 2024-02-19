@@ -1,0 +1,17 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<div class="container">
+    <h4 style="color: red;">Delete Month</h4>
+    <p>Are you sure you want to delete this month?</p>
+    <p><strong>Report Month:</strong> {{ month.report_month }}</p>
+    <p><strong>Start Date:</strong> {{ month.start_date }}</p>
+    <p><strong>End Date:</strong> {{ month.end_date }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'month-list' month.quarter_id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
