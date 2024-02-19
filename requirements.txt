@@ -17,12 +17,20 @@ django-crispy-forms==2.1
     # via
     #   -r requirements.in
     #   crispy-bootstrap5
+environs==10.3.0
+    # via -r requirements.in
+marshmallow==3.20.2
+    # via environs
 numpy==1.26.4
     # via pandas
+packaging==23.2
+    # via marshmallow
 pandas==2.2.0
     # via -r requirements.in
 python-dateutil==2.8.2
     # via pandas
+python-dotenv==1.0.1
+    # via environs
 pytz==2024.1
     # via pandas
 six==1.16.0
