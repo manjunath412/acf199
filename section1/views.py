@@ -16,6 +16,7 @@ import pandas as pd
 
 from .forms import QuarterForm, MonthForm, FamilyForm, AdultForm, ChildForm, MonthSelectionForm, FileUploadForm, QuarterSelectionForm
 from .models import Quarter, Month, Family, Adult, Child, ValidationResult, FileUpload, ImportError, GeneratedFile
+from .tasks import DataValidator
 
 class QuarterListView(LoginRequiredMixin, ListView):
     model = Quarter
@@ -631,7 +632,7 @@ class ValidateDataView(TemplateView):
         if form.is_valid():
             report_month = form.cleaned_data['report_month'].report_month
             #version = self.perform_validation(request.user, report_month)
-            self.perform_validation(request.user, report_month)
+            self.init_validation(request.user, report_month)
             #if version is not None:
                 # Fetch validation results for the current report_month and version
             #    validation_results = ValidationResults.objects.filter(report_month=report_month, version=version)
@@ -648,36 +649,12 @@ class ValidateDataView(TemplateView):
         
         return self.render_to_response(self.get_context_data(form=form))
         #return render(request, self.template_name, {'form': form})
-
-    def is_valid_item49(item30, item49):
-        valid_item49_values = ['01', '02', '05', '06', '07', '08', '09', '10', 
-                            '11', '12', '13', '14', '15', '16', '17', '18', 
-                            '19', '99']
-        if item30 in [1, 2]:
-            return item49 in valid_item49_values
-        return True
-    
-    def log_validation_errors(self, report_month, version, edit_type, edit_number, item_number, description, edit_values, family=None, adult=None):
-        ValidationResult.objects.create(
-            report_month=report_month,
-            version=version,
-            edit_type = edit_type,
-            edit_number = edit_number,
-            item_number = item_number,
-            description = description,
-            edit_values=edit_values,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-            adult=adult,
-            family=family
-        )
     
     def get_next_version(self, report_month):
         latest_validation = ValidationResult.objects.filter(report_month=report_month).order_by('-version').first()
         return (latest_validation.version + 1) if latest_validation else 1
 
-    def perform_validation(self, user, report_month):
-        # Fetch the month instance for the given report_month
+    def init_validation(self, user, report_month):
         print(report_month)
         try:
             month_instance = Month.objects.get(report_month=report_month)
@@ -686,176 +663,8 @@ class ValidateDataView(TemplateView):
             return
         
         version = self.get_next_version(report_month)
-
-        families = Family.objects.filter(month=month_instance)
-        
-        for family in families:
-            self.validate_family(family, report_month, version)
-            adults = family.adult_set.all()
-            for adult in adults:
-                self.validate_adult(adult, report_month, family, version)
-
-        return version
-    
-    def validate_family(self, family, report_month, version):
-        for field in family._meta.get_fields():
-        # Skip ManyToMany and reverse relation fields to avoid unnecessary complexity
-            if field.many_to_many or field.auto_created:
-                continue
-
-            field_value = getattr(family, field.name, None)
-            '''
-            edit_type = 'FATAL'
-            if field.name == 'county_fips_code':
-                edit_type = 'NOERRROR'
-                edit_number = 'T1-001'
-                item_number = 1
-                description = 'FAMILY-FIPS-CODE'
-                edit_values = 'ITEM 1 MUST = 01-02,04-06,08-13,15-42,44-51,53-56,60,66,72,78'
-                if field_value not in self.valid_fips_codes:
-                    edit_type = 'FATAL'
-                    self.log_validation_errors(
-                        report_month, version, edit_type, edit_number, 
-                        item_number, description, edit_values, family=family)
-            '''
-            if field.name == 'stratum':
-                edit_number = 'T1-003'
-                item_number = 5
-                description = 'STRATUM'
-                edit_values = 'ITEM 5 MUST = 00-99'
-                if field_value.isdigit() and 0 <= int(field_value) <= 99:
-                    edit_type =  'NOERROR'
-                else:
-                    edit_type = 'FATAL'
-
-                self.log_validation_errors(
-                    report_month, version, edit_type, edit_number, 
-                    item_number, description, edit_values, family)
-                
-                if field.name == 'disposition':
-                    edit_number = 'T1-008'
-                    item_number = 9
-                    description = 'DISPOSITION'
-                    edit_values = 'ITEM 9 MUST = 1-2'
-                    if field_value.isdigit() and 1 <= int(field_value) <= 2:
-                        edit_type =  'NOERROR'
-                    else:
-                        edit_type = 'FATAL'
-
-                    self.log_validation_errors(
-                        report_month, version, edit_type, edit_number, 
-                        item_number, description, edit_values, family=family)
-                
-                if field.name == 'num_family_members':
-                    edit_number = 'T1-010'
-                    item_number = 11
-                    description = '# OF FAMILY MEMBERS'
-                    edit_values = 'ITEM 11 MUST > 0'
-                    if field_value.isdigit() and int(field_value) > 0:
-                        edit_type =  'NOERROR'
-                    else:
-                        edit_type = 'FATAL'
-
-                    self.log_validation_errors(
-                        report_month, version, edit_type, edit_number, 
-                        item_number, description, edit_values, family=family)
-                
-                if field.name == 'family_type':
-                    edit_number = 'T1-011'
-                    item_number = 12
-                    description = 'TYPE OF FAMILY FOR WORK PARTICIPATION'
-                    edit_values = 'ITEM 12 MUST = 1-3 '
-                    if field_value.isdigit() and 1 <= int(field_value) <= 2:
-                        edit_type =  'NOERROR'
-                    else:
-                        edit_type = 'FATAL'
-
-                    self.log_validation_errors(
-                        report_month, version, edit_type, edit_number, 
-                        item_number, description, edit_values, family=family)
-
-    def validate_adult(self, adult, report_month, family, version):
-        family_affiliation = adult.family_affiliation
-        #if field.name == 'family_affiliation':
-        edit_number = 'T1-014'
-        item_number = 30
-        description = 'FAMILY AFFILIATION - ADULT'
-        edit_values = 'ITEM 30 MUST = 1-5'
-        if family_affiliation.isdigit() and 1 <= int(family_affiliation) <= 5:
-            edit_type =  'NOERROR'
-        else:
-            edit_type = 'FATAL'
-
-        self.log_validation_errors(
-            report_month, version, edit_type, edit_number, 
-            item_number, description, edit_values, family, adult)
-            
-        for field in adult._meta.get_fields():
-            if field.many_to_many or field.auto_created:
-                continue
-            field_value = getattr(adult, field.name, None)
-        
-            if field.name == 'date_of_birth':
-                description = 'DATE OF BIRTH'
-                if field_value == '99999999':
-                    if family_affiliation.isdigit() and 2 <= int(family_affiliation) <= 5:
-                        pass
-                    else:
-                        edit_number = 'T1-015'
-                        item_number = 32
-                        edit_type =  'FATAL'
-                        edit_values = 'IF ITEM 32 = 99999999 ITEM 30 MUST = 2-5'
-                elif not field_value.strip() or (field_value.isdigit() and int(field_value) == 0):
-                    edit_number = 'T1-016'
-                    item_number = 32
-                    edit_type =  'FATAL'
-                    edit_values = 'ITEM 32 MUST NOT BE BLANK OR ZEROES'
-                else:
-                    edit_number = 'T1-016'
-                    item_number = 32
-                    edit_type =  'NOERROR'
-                    edit_values = 'ITEM 32 MUST NOT BE BLANK OR ZEROES; IF ITEM 32 = 99999999 ITEM 30 MUST = 2-5'
-                self.log_validation_errors(
-                    report_month, version, edit_type, edit_number, 
-                    item_number, description, edit_values, family, adult)
-
-            if field.name == 'ssn':
-                description = 'SOCIAL SECURITY NUMBER'
-                if field_value == '999999999':
-                    if family_affiliation.isdigit() and 2 <= int(family_affiliation) <= 5:
-                        pass
-                    else:
-                        edit_number = 'T1-018'
-                        item_number = 33
-                        edit_type =  'FATAL'
-                        edit_values = 'IF ITEM 33 = 999999999 ITEM 30 MUST = 2-5'
-                elif not field_value.strip() or (field_value.isdigit() and int(field_value) == 0):
-                    edit_number = 'T1-017'
-                    item_number = 33
-                    edit_type =  'FATAL'
-                    edit_values = 'ITEM 33 MUST NOT BE BLANK OR ZEROES'
-                else:
-                    edit_number = 'T1-017'
-                    item_number = 33
-                    edit_type =  'NOERROR'
-                    edit_values = 'ITEM 33 MUST NOT BE BLANK OR ZEROES; IF ITEM 33 = 999999999 ITEM 30 MUST = 2-5'
-                self.log_validation_errors(
-                    report_month, version, edit_type, edit_number, 
-                    item_number, description, edit_values, family, adult)
-
-                if field.name == 'item34a_hispanic_latino' or field.name == 'item34d_black' or field.name == 'item34b_american_indian_alaska_native' \
-                    or field.name ==  'item34c_asian' or field.name == 'item34e_native_pacific_islander' or field.name == 'item34f_white':
-                    edit_number = 'T1-020'
-                    item_number = 34
-                    edit_type =  'NOERROR'
-                    edit_values = 'ITEM 34a,b,c,f,d,e,f CAN BE BLANK OR ZEROES IF FAMILYAFFIL = 5 ELSE SHOULD BE 1 OR 2'
-                    description = 'RACE/ETHNICITY'
-                    if family_affiliation.isdigit() and 1 <= int(family_affiliation) < 5:
-                        if not field_value.strip() or (field_value.isdigit() and (int(field_value) <= 0 or int(field_value) > 2)):
-                            edit_type =  'FATAL'
-                    self.log_validation_errors(
-                        report_month, version, edit_type, edit_number, 
-                        item_number, description, edit_values, family, adult)
+        validator = DataValidator(user, version, report_month)
+        validator.perform_validation()
 
 class ErrorListView(LoginRequiredMixin, ListView):
     model = ValidationResult
