@@ -3,7 +3,7 @@
 {% block title %}Quarters{% endblock title %}
 
 {% block content %}
-<a href="{% url 'family_create' selected_month.pk %}" class="btn btn-primary">Add New Family</a>
+<a href="{% url 'family_create' month.pk %}" class="btn btn-primary">Add New Family</a>
 
 <h4 style="color: red;">Families for Month: {{ month.report_month }}</h4>
 <div class="containter mt-3">

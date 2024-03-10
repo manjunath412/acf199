@@ -56,9 +56,10 @@ class DataValidator:
 
     def closeout_validation(self):
         closeout_version = ValidationResult.objects.filter(report_month=self.report_month).order_by('-version').first()
-        if closeout_version.version != self.version:
-            #self.version += 1
-            self.create_validation_error('T-000', '000', 'NO ERRORS','NO ERRORS', 'NO ERRORS')
+        if closeout_version is not None:
+            if closeout_version.version != self.version:
+                #self.version += 1
+                self.create_validation_error('T-000', '000', 'NO ERRORS','NO ERRORS', 'NO ERRORS')
 
     def validate_case_numbers(self):
         missing_cases = Family.objects.filter(case_number__isnull=True, case_number='')

@@ -590,30 +590,31 @@ class ValidateDataView(TemplateView):
                             latest_version=Max('version'),
                             max_updated_at=Max('updated_at')
                             )
-        for month_version in latest_versions:
-            report_month = month_version['report_month']
-            version = month_version['latest_version']
-            latest_run_date = month_version['max_updated_at']
-            
-            errors_count = ValidationResult.objects.filter(
-                report_month=report_month, 
-                version=version,
-                edit_type='FATAL'
-            ).count()
-            
-            no_errors_count = ValidationResult.objects.filter(
-                report_month=report_month, 
-                version=version,
-                edit_type='NOERROR'
-            ).count()
-            
-            month_stats.append({
-                'month': report_month,
-                'errors_count': errors_count,
-                'no_errors_count': no_errors_count,
-                'version': version,
-                'max_updated_at': latest_run_date
-            })
+        if latest_versions is not None:
+            for month_version in latest_versions:
+                report_month = month_version['report_month']
+                version = month_version['latest_version']
+                latest_run_date = month_version['max_updated_at']
+                
+                errors_count = ValidationResult.objects.filter(
+                    report_month=report_month, 
+                    version=version,
+                    edit_type='FATAL'
+                ).count()
+                
+                no_errors_count = ValidationResult.objects.filter(
+                    report_month=report_month, 
+                    version=version,
+                    edit_type='NOERROR'
+                ).count()
+                
+                month_stats.append({
+                    'month': report_month,
+                    'errors_count': errors_count,
+                    'no_errors_count': no_errors_count,
+                    'version': version,
+                    'max_updated_at': latest_run_date
+                })
             return month_stats
                             
     def get_context_data(self, **kwargs):
